@@ -1,5 +1,5 @@
 local startpos_win = CFrame.new(-4202, 171, -1933)
-local endpos_win = CFrame.new(-5332, 1248, -2553)
+local endpos_win = CFrame.new(-5332, 1246, -2553)
 
 -- Инициализация персонажа
 local Player = game.Players.LocalPlayer
@@ -61,7 +61,7 @@ local Toggle = Tab:CreateToggle({
                 while FarmingActive do
                     -- Телепортация в первую точку
                     HRP.CFrame = startpos_win
-                    wait(0.1) -- Задержка
+                    wait(0.2) -- Задержка
                     
                     -- Проверка, не был ли тогл выключен во время wait
                     if not FarmingActive then break end
