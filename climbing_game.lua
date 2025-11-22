@@ -61,14 +61,14 @@ local Toggle = Tab:CreateToggle({
                 while FarmingActive do
                     -- Телепортация в первую точку
                     HRP.CFrame = startpos_win
-                    wait(0.2) -- Задержка
+                    wait(0.01) -- Задержка
                     
                     -- Проверка, не был ли тогл выключен во время wait
                     if not FarmingActive then break end
 
                     -- Телепортация во вторую точку
                     HRP.CFrame = endpos_win
-                    wait(0.1) -- Задержка
+                    wait(0.01) -- Задержка
 
                     -- Проверка, не был ли тогл выключен во время wait
                     if not FarmingActive then break end
