@@ -1,82 +1,65 @@
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Точки для телепортации (ваши координаты)
 local startpos_win = CFrame.new(-4202, 171, -1933)
-local endpos_win = CFrame.new(-5332, 1246, -2553)
+local endpos_win = CFrame.new(-5332, 1248, -2553)
+
+-- Ключевые переменные
+local FarmingKey = Enum.KeyCode.F -- Клавиша-тогл
+local IsFarming = false -- Флаг состояния (true = фарм включен, false = фарм выключен)
+local Connection = nil -- Переменная для хранения соединения RunService
 
 -- Инициализация персонажа
 local Player = game.Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
 
--- Переменная для контроля состояния фарма (останавливаем цикл, если тогл выключен)
-local FarmingActive = false
+-- === ФУНКЦИЯ ЗАПУСКА ИЛИ ОСТАНОВКИ ФАРМА ===
+local function ToggleFarming()
+    -- Инвертируем состояние: если true, станет false, и наоборот.
+    IsFarming = not IsFarming
 
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+    if IsFarming then
+        -- === ЗАПУСК ФАРМА ===
+        print("Фарм активирован (Клавиша F: ВКЛ)")
 
-local Window = Rayfield:CreateWindow({
-    -- ... (остальные настройки окна Rayfield) ...
-    Name = "Farm Hub",
-    Icon = 0,
-    LoadingTitle = "Climbing game ",
-    LoadingSubtitle = "by logic-break",
-    ShowText = "Rayfield",
-    Theme = "Default",
-    ToggleUIKeybind = "K",
-    DisableRayfieldPrompts = false,
-    DisableBuildWarnings = false,
-    ConfigurationSaving = {
-       Enabled = true,
-       FolderName = nil,
-       FileName = "Shit Hub"
-    },
-    Discord = {
-       Enabled = false,
-       Invite = "noinvitelink",
-       RememberJoins = true
-    },
-    KeySystem = false,
-    KeySettings = {
-       Title = "Untitled",
-       Subtitle = "Key System",
-       Note = "No method of obtaining the key is provided",
-       FileName = "Key",
-       SaveKey = true,
-       GrabKeyFromSite = false,
-       Key = {"Hello"}
-    }
-})
+        -- Используем RunService.Heartbeat для быстрого и стабильного цикла
+        Connection = RunService.Heartbeat:Connect(function()
+            -- Если состояние изменилось на false во время цикла, выходим
+            if not IsFarming then
+                Connection:Disconnect()
+                Connection = nil
+                return
+            end
 
-local Tab = Window:CreateTab("Main", 4483362458)
+            -- Шаг 1: Телепорт в первую точку
+            HRP.CFrame = startpos_win
+            wait(0.1) -- Задержка 
+            
+            if not IsFarming then return end
 
-local Toggle = Tab:CreateToggle({
-    Name = "Farm Winter Apricity",
-    CurrentValue = false,
-    Flag = "Toggle1",
-    Callback = function(Value)
-        -- Переменная Value — это состояние тогла (true/false)
+            -- Шаг 2: Телепорт во вторую точку
+            HRP.CFrame = endpos_win
+            wait(0.1) -- Задержка
+        end)
+    else
+        -- === ОСТАНОВКА ФАРМА ===
+        print("Фарм остановлен (Клавиша F: ВЫКЛ)")
 
-        FarmingActive = Value -- Обновляем наш локальный контроллер
-
-        if FarmingActive then
-            -- Если тогл включен, запускаем цикл в отдельном потоке (coroutine)
-            spawn(function()
-                while FarmingActive do
-                    -- Телепортация в первую точку
-                    HRP.CFrame = startpos_win
-                    wait(0.01) -- Задержка
-                    
-                    -- Проверка, не был ли тогл выключен во время wait
-                    if not FarmingActive then break end
-
-                    -- Телепортация во вторую точку
-                    HRP.CFrame = endpos_win
-                    wait(0.01) -- Задержка
-
-                    -- Проверка, не был ли тогл выключен во время wait
-                    if not FarmingActive then break end
-                end
-            end)
+        -- Отключаем соединение RunService, чтобы остановить цикл
+        if Connection then
+            Connection:Disconnect()
+            Connection = nil
         end
-        
-        -- Если тогл выключен (FarmingActive = false), цикл просто завершится
-        -- после следующего оператора wait(0.1)
-    end,
-})
+    end
+end
+
+-- === ОБРАБОТКА ВВОДА ПОЛЬЗОВАТЕЛЯ (Только InputBegan) ===
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    -- Проверяем, что это наша клавиша F и что ввод не обработан самой игрой
+    if input.KeyCode == FarmingKey and not gameProcessedEvent then
+        ToggleFarming()
+    end
+end)
+print("Script activated!!! press F to enable/disable farm")
